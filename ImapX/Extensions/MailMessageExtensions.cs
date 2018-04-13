@@ -1,4 +1,4 @@
-﻿using ImapX.Exceptions;
+using ImapX.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -44,7 +44,7 @@ namespace ImapX.Extensions
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine(ex.ToString());
+                    ImapBase.DebugLog(ex.ToString());
                     return null;
                 }
                 finally
