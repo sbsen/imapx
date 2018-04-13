@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -329,6 +329,7 @@ namespace ImapX
 
         private void TryProcessInternalDate(string data)
         {
+            ImapBase.DebugLog("TryProcessInternalDate data: {0}", data);
             Match dateMatch = Expressions.InternalDateRex.Match(data);
             if (!dateMatch.Success) return;
 
@@ -576,13 +577,20 @@ namespace ImapX
         {
 
             var buffer = "";
-
+            if (data.Count > 2)
+            {
+                Match bstructMatch = Expressions.BodyStructRex.Match(data[data.Count - 2]);
+                if (bstructMatch.Success)
+                    data.Insert(data.Count - 1, "-:");
+            }
+           
             for (var i = 0; i < data.Count; i++)
             {
                 var str = string.IsNullOrEmpty(buffer) ? data[i] : buffer + data[i];
 
                 if ((str.Split(')').Length + (i == 0 ? 1 : 0)) >= (str.Split('(').Length) || (i + 1 < data.Count && Regex.IsMatch(data[i + 1], @"^[A-Za-z-]+:")))
                 {
+                    ImapBase.DebugLog(str);
                     ProcessCommandResult(str);
                     buffer = "";
                 }
