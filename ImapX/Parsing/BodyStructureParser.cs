@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -180,6 +180,10 @@ namespace ImapX.Parsing
                 _reader.Read();
                 return part;
             }
+            if (_reader.Peek() == '(')
+            {
+                return part;
+            }
             part.Md5 = ReadString();
 
             if (_reader.Peek() == ')')
@@ -234,7 +238,7 @@ namespace ImapX.Parsing
                 else if (tmp == ')')
                 {
                     braces--;
-                    if (braces <= 0)
+                    if (braces < 0)
                         break;
                     
                 }
@@ -425,16 +429,11 @@ namespace ImapX.Parsing
             var type = ReadString().ToLower();
             var paramaters = ReadParameterList();
 
-            ContentDisposition disposition;
+            ContentDisposition disposition = null;
 
             try
             {
                 disposition = new ContentDisposition(type);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Failed on: " + type, ex);    
-            }
 
             foreach (var paramater in paramaters)
             {
@@ -450,6 +449,11 @@ namespace ImapX.Parsing
             SkipSpaces();
             _reader.Read(); // read ')'
             SkipSpaces();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Failed on: " + type, ex);    
+            }
             return disposition;
         }
 
