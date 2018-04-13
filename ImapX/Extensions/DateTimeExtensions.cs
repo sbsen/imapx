@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -27,6 +27,8 @@ namespace ImapX.Extensions
                 "ddd, dd MMM yyyy HH:mm",
                 "dd MMM yyyy HH:mm",
                 "ddd, d MMM yyyy HH:mm:ss",
+                "ddd, d MMM yyyy H:mm:ss",  // ^ new date format added by sbsen 04/14/2018
+                "ddd, dd MMM yyyy H:mm:ss", // ^ new date format added by sbsen 04/14/2018
                 "ddd, d MMM yyyy HH:mm",
                 "d MMM yyyy HH:mm:ss", // ^ new date format added by danbert2000 5/8/14
                 "ddd, dd-MMM-yyyy HH:mm:ss",
@@ -81,8 +83,10 @@ namespace ImapX.Extensions
             var date = ParseValue(value, out timeZoneString);
 
             if (!date.HasValue)
+            {
+                ImapBase.DebugLog("Date Parse Failed, Date Format Missing For Mail Date: {0}",value);
                 return null;
-
+            }
             if (TryParseTimeZoneString(timeZoneString, out timeZone))
             {
                 DateTimeOffset offset = new DateTimeOffset(date.Value, timeZone);
