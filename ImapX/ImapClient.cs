@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -192,16 +192,16 @@ namespace ImapX
                             iCumulate += moreLine.Length;
                             sb.Append(moreLine);
                         }
-                        if (IsDebug)
-                            Debug.WriteLine("ImapX string Literal:{0}", sb.ToString());
+
+                        DebugLog("ImapX string Literal:{0}", sb.ToString());
 
                         checkLiteralString += sb.ToString();
                     }
                     else
                         checkLiteralString += " \"\"";  // add empty string
 
-                    if (IsDebug)
-                        Debug.WriteLine("ImapX Rewrite return into:{0}", checkLiteralString);
+
+                    DebugLog("ImapX Rewrite return into:{0}", checkLiteralString);
                 }
                 var folder = Folder.Parse(checkLiteralString, ref parent, this);
                 commonFolders.TryBind(ref folder);
