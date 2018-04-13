@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -64,7 +64,19 @@ namespace ImapX
             get { return _client != null && _client.Connected; }
         }
 
-        public bool IsDebug { get; set; }
+        public static bool IsDebug { get; set; }
+
+        public static void DebugLog(string debugMessage)
+        {
+            if (IsDebug)
+                Debug.WriteLine(debugMessage);
+        }
+
+        public static void DebugLog(string format, params object[] args)
+        {
+            if (IsDebug)
+                Debug.WriteLine(format, args);
+        }
 
         public bool ThrowConnectExceptions { get; set; }
 
@@ -362,8 +374,8 @@ namespace ImapX
                 string text = string.Format(tmpl, _counter, parts.Dequeue().Trim()) + "\r\n";
                 byte[] bytes = Encoding.UTF8.GetBytes(text.ToCharArray());
 
-                if (IsDebug)
-                    Debug.WriteLine(text);
+
+                DebugLog(text);
 
                 _ioStream.Write(bytes, 0, bytes.Length);
 
@@ -371,6 +383,8 @@ namespace ImapX
 
                 while (true)
                 {
+                    if (!reader.EndOfStream)
+                    {
                     string tmp = reader.ReadLine();
 
                     if (tmp == null)
@@ -382,8 +396,7 @@ namespace ImapX
                         return false;
                     }
 
-                    if (IsDebug)
-                        Debug.WriteLine(tmp);
+                    DebugLog(tmp);
 
                     if (processor == null || pushResultToDatadespiteProcessor)
                         data.Add(tmp);
@@ -397,8 +410,7 @@ namespace ImapX
                         {
                             text = parts.Dequeue().Trim() + "\r\n";
 
-                            if (IsDebug)
-                                Debug.WriteLine(text);
+                            DebugLog(text);
 
                             bytes = Encoding.UTF8.GetBytes(text.ToCharArray());
                         }
@@ -438,6 +450,7 @@ namespace ImapX
                         if (serverAlertMatch.Success && tmp.Contains("IMAP") && tmp.Contains("abled"))
                             throw new ServerAlertException(serverAlertMatch.Groups[1].Value);
                         return false;
+                        }
                     }
                 }
             }
@@ -492,16 +505,16 @@ namespace ImapX
                 _counter++;
                 string text = string.Format(tmpl, _counter, "IDLE") + "\r\n";
                 byte[] bytes = Encoding.UTF8.GetBytes(text.ToCharArray());
-                if (IsDebug)
-                    Debug.WriteLine(text);
+
+                DebugLog(text);
 
                 _ioStream.Write(bytes, 0, bytes.Length);
                 if (_ioStream.ReadByte() != '+')
                     return false;
                 var line = _streamReader.ReadLine();
 
-                if (IsDebug && !string.IsNullOrEmpty(line))
-                    Debug.WriteLine(line);
+                if (!string.IsNullOrEmpty(line))
+                    DebugLog(line);
             }
 
             _idleState = IdleState.On;
@@ -604,8 +617,7 @@ namespace ImapX
                     if (tmp == null)
                         continue;
 
-                    if (IsDebug)
-                        Debug.WriteLine(tmp);
+                        DebugLog(tmp);
 
                     if (tmp.ToUpper().Contains("OK IDLE COMPLETED") || tmp.ToUpper().Contains("TERMINATED"))
                     {
@@ -656,8 +668,8 @@ namespace ImapX
             _counter++;
             const string text = "DONE" + "\r\n";
             byte[] bytes = Encoding.UTF8.GetBytes(text.ToCharArray());
-            if (IsDebug)
-                Debug.WriteLine(text);
+            
+            DebugLog(text);
 
             _ioStream.Write(bytes, 0, bytes.Length);
             _idleState = IdleState.Stopping;
